@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///./travel_booking.db
+      - SECRET_KEY=dev-secret-key-change-in-production
+    volumes:
+      - .:/app
+      - db_data:/app/data
+    develop:
+      watch:
+        - action: sync
+          path: ./app
+          target: /app/app
+          ignore:
+            - __pycache__/
+        - action: rebuild
+          path: requirements.txt
+
+volumes:
+  db_data: 
