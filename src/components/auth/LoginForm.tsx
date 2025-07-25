@@ -10,6 +10,7 @@ import { closeModal, openModal } from '../../store/slices/uiSlice';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { authAPI } from '../../utils/api';
+import { User } from '../../types';
 
 interface LoginFormData {
   email: string;
@@ -48,7 +49,7 @@ export function LoginForm() {
             // Get user info from backend
             try {
               const userInfo = await authAPI.getCurrentUser();
-              dispatch(loginSuccess(userInfo as any));
+              dispatch(loginSuccess(userInfo as User));
             } catch {
               // Fallback to demo user if API fails
               const user = {
@@ -85,9 +86,10 @@ export function LoginForm() {
         dispatch(loginFailure('Invalid email or password'));
         setError('root', { message: 'Invalid email or password' });
       }
-    } catch (error) {
+    } catch (apiError) {
       dispatch(loginFailure('Login failed. Please try again.'));
       setError('root', { message: 'Login failed. Please try again.' });
+      console.error('Login failed:', apiError);
     } finally {
       setIsLoading(false);
     }
@@ -252,7 +254,7 @@ export function LoginForm() {
       </div>
 
       <p className="mt-6 text-center text-sm text-gray-600">
-        Don't have an account?{' '}
+        Don&apos;t have an account?{' '}
         <button
           type="button"
           onClick={() => {

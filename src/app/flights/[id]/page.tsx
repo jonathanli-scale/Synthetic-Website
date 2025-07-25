@@ -15,7 +15,7 @@ import {
   MapPin,
   AlertCircle
 } from 'lucide-react';
-import { format, addMinutes } from 'date-fns';
+import { format } from 'date-fns';
 import { Flight } from '../../../types';
 import { mockFlights } from '../../../utils/mockData';
 import { startBooking } from '../../../store/slices/bookingSlice';
@@ -43,7 +43,7 @@ export default function FlightDetailsPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">Flight not found</h2>
-          <p className="text-gray-600 mb-4">The flight you're looking for doesn't exist.</p>
+          <p className="text-gray-600 mb-4">The flight you&apos;re looking for doesn&apos;t exist.</p>
           <Button onClick={() => router.back()}>Go Back</Button>
         </div>
       </div>
@@ -61,7 +61,7 @@ export default function FlightDetailsPage() {
       type: 'flight',
       flight: {
         flightId: flight.id,
-        passengers: Array.from({ length: passengers }, (_, i) => ({
+        passengers: Array.from({ length: passengers }, () => ({
           firstName: '',
           lastName: '',
           dateOfBirth: '',

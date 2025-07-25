@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
-import { Plane, Clock, Calendar } from 'lucide-react';
+import { Plane, Clock } from 'lucide-react';
 import { Flight } from '../../types';
 import { Button } from '../ui/Button';
 import { startBooking } from '../../store/slices/bookingSlice';

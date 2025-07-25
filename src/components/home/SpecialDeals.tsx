@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Clock, Percent, Zap } from 'lucide-react';
 import { Button } from '../ui/Button';
 
@@ -74,7 +75,7 @@ export function SpecialDeals() {
             Special Deals & Offers
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Don't miss out on these limited-time offers. Save big on your next adventure!
+            Don&apos;t miss out on these limited-time offers. Save big on your next adventure!
           </p>
         </div>
 
@@ -116,9 +117,11 @@ export function SpecialDeals() {
               )}
               
               <div className="relative">
-                <img
+                <Image
                   src={deal.image}
                   alt={deal.title}
+                  width={800}
+                  height={400}
                   className="w-full h-48 object-cover"
                 />
                 <div className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded-lg font-bold">

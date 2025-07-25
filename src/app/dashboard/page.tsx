@@ -5,12 +5,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import {
   Calendar,
-  MapPin,
   Plane,
   Hotel,
   Car,
   User,
-  Settings,
   CreditCard,
   Bell,
   LogOut,
@@ -26,6 +24,7 @@ import { logout } from '../../store/slices/userSlice';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { bookingAPI } from '../../utils/api';
+import { BookingState, UserState } from '../../types';
 
 // Mock user data
 const mockUser = {
@@ -37,14 +36,13 @@ const mockUser = {
   createdAt: '2023-01-15T00:00:00Z',
 };
 
-// Mock bookings data - Start with empty array for clean account
-const mockBookings: never[] = [];
-
 export default function DashboardPage() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { bookings } = useSelector((state: RootState) => (state.booking as any));
-  const { isAuthenticated, user } = useSelector((state: RootState) => (state.user as any));
+  const bookingState = useSelector((state: RootState) => state.booking as BookingState);
+  const userState = useSelector((state: RootState) => state.user as UserState);
+  const { bookings } = bookingState;
+  const { isAuthenticated, user } = userState;
   
   const [activeTab, setActiveTab] = useState('bookings');
   const [showBookingDetails, setShowBookingDetails] = useState<string | null>(null);
@@ -60,8 +58,8 @@ export default function DashboardPage() {
     // Load bookings from API or fallback to empty array
     const loadBookings = async () => {
       try {
-                 const apiBookings = await bookingAPI.getUserBookings();
-         dispatch(loadBookingsSuccess(apiBookings as any));
+        const apiBookings = await bookingAPI.getUserBookings();
+        dispatch(loadBookingsSuccess(apiBookings as never[]));
       } catch (error) {
         console.log('Failed to load bookings from API, using empty array:', error);
         // Start with empty bookings array for clean account

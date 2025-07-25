@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
+import Image from 'next/image';
 import { 
-  Car as CarIcon, 
   Users, 
   Settings, 
   Fuel, 
@@ -53,7 +53,7 @@ export default function CarDetailsPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">Car not found</h2>
-          <p className="text-gray-600 mb-4">The car you're looking for doesn't exist.</p>
+          <p className="text-gray-600 mb-4">The car you&apos;re looking for doesn&apos;t exist.</p>
           <Button onClick={() => router.back()}>Go Back</Button>
         </div>
       </div>
@@ -165,9 +165,11 @@ export default function CarDetailsPage() {
 
               {/* Car Image */}
               <div className="relative h-64 md:h-80 rounded-lg overflow-hidden mb-6">
-                <img
+                <Image
                   src={car.images[0]}
                   alt={car.name}
+                  width={800}
+                  height={400}
                   className="w-full h-full object-cover"
                 />
               </div>

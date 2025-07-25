@@ -6,6 +6,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { RootState } from '../../store';
 import { setHotelFilters, setFlightFilters, setCarFilters } from '../../store/slices/searchSlice';
 import { Button } from '../ui/Button';
+import { SearchState } from '../../types';
 
 interface FilterSidebarProps {
   searchType: 'hotels' | 'flights' | 'cars';
@@ -13,7 +14,7 @@ interface FilterSidebarProps {
 
 export function FilterSidebar({ searchType }: FilterSidebarProps) {
   const dispatch = useDispatch();
-  const searchState = useSelector((state: RootState) => state.search) as any;
+  const searchState = useSelector((state: RootState) => state.search as SearchState);
   const currentFilters = searchType === 'hotels' ? searchState.hotels.filters : 
                         searchType === 'flights' ? searchState.flights.filters : 
                         searchState.cars.filters;

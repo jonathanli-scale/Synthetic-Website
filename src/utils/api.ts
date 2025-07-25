@@ -28,6 +28,35 @@ async function apiCall<T>(endpoint: string, options: RequestInit = {}): Promise<
   return response.json();
 }
 
+interface BookingData {
+  booking_type: string;
+  hotel_id?: number;
+  flight_id?: number;
+  check_in_date?: string;
+  check_out_date?: string;
+  guest_details: {
+    adults: number;
+    children: number;
+    rooms: number;
+  };
+  traveler_info: Array<{
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+      country: string;
+    };
+  }>;
+  total_price: number;
+  currency?: string;
+  special_requests?: string;
+}
+
 // Auth API calls
 export const authAPI = {
   demoLogin: async () => {
@@ -52,18 +81,7 @@ export const authAPI = {
 
 // Booking API calls
 export const bookingAPI = {
-  createBooking: async (bookingData: {
-    booking_type: string;
-    hotel_id?: number;
-    flight_id?: number;
-    check_in_date?: string;
-    check_out_date?: string;
-    guest_details: any;
-    traveler_info: any[];
-    total_price: number;
-    currency?: string;
-    special_requests?: string;
-  }) => {
+  createBooking: async (bookingData: BookingData) => {
     return apiCall('/bookings/', {
       method: 'POST',
       body: JSON.stringify(bookingData),

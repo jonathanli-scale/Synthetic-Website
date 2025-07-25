@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
+import Image from 'next/image';
 import { 
-  Car as CarIcon, 
   Users, 
   Settings, 
   Fuel, 
@@ -62,9 +62,11 @@ export function CarCard({ car }: CarCardProps) {
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
       {/* Car Image */}
       <div className="relative h-48">
-        <img
+        <Image
           src={car.images[0]}
           alt={car.name}
+          width={800}
+          height={400}
           className="w-full h-full object-cover"
         />
         {savings > 0 && (

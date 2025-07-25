@@ -1,28 +1,36 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle, Calendar, MapPin, Users, Download, Share } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 
-export default function BookingConfirmedPage() {
+interface BookingDetails {
+  id: string;
+  type: string;
+  totalPrice: string;
+  confirmationDate: string;
+}
+
+function BookingConfirmedContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [bookingDetails, setBookingDetails] = useState<any>(null);
 
   const bookingId = searchParams.get('bookingId');
   const bookingType = searchParams.get('type');
   const totalPrice = searchParams.get('total');
 
   useEffect(() => {
-    // In a real app, you'd fetch booking details from API using bookingId
+    // In a real app, you&apos;d fetch booking details from API using bookingId
     if (bookingId) {
-      setBookingDetails({
+      const details: BookingDetails = {
         id: bookingId,
-        type: bookingType,
-        totalPrice: totalPrice,
+        type: bookingType || '',
+        totalPrice: totalPrice || '',
         confirmationDate: new Date().toISOString(),
-      });
+      };
+      // Use details if needed in the future
+      console.log('Booking details:', details);
     }
   }, [bookingId, bookingType, totalPrice]);
 
@@ -31,7 +39,7 @@ export default function BookingConfirmedPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">No booking found</h2>
-          <p className="text-gray-600 mb-4">We couldn't find your booking confirmation.</p>
+          <p className="text-gray-600 mb-4">We couldn&apos;t find your booking confirmation.</p>
           <Button onClick={() => router.push('/')}>Return Home</Button>
         </div>
       </div>
@@ -92,7 +100,7 @@ export default function BookingConfirmedPage() {
                   Confirmation Email Sent
                 </h3>
                 <p className="text-green-800">
-                  We've sent a detailed confirmation email with your booking information, 
+                  We&apos;ve sent a detailed confirmation email with your booking information, 
                   including any special instructions and contact details. Please check your 
                   inbox and spam folder.
                 </p>
@@ -102,7 +110,7 @@ export default function BookingConfirmedPage() {
 
           {/* Next Steps */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-3">What's Next?</h3>
+            <h3 className="text-lg font-semibold text-blue-900 mb-3">What&apos;s Next?</h3>
             <ul className="space-y-2 text-blue-800">
               <li className="flex items-start">
                 <span className="inline-block w-2 h-2 bg-blue-600 rounded-full mr-3 mt-2"></span>
@@ -185,5 +193,20 @@ export default function BookingConfirmedPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function BookingConfirmedPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading booking confirmation...</p>
+        </div>
+      </div>
+    }>
+      <BookingConfirmedContent />
+    </Suspense>
   );
 } 

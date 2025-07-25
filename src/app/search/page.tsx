@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { Filter, Grid, List, SortAsc } from 'lucide-react';
@@ -14,49 +14,54 @@ import {
   setCarSort
 } from '../../store/slices/searchSlice';
 import { setSearchType } from '../../store/slices/uiSlice';
-import { searchHotels, searchFlights, searchCars } from '../../utils/mockData';
+import { searchHotels, searchFlights } from '../../utils/mockData';
 import { HotelCard } from '../../components/search/HotelCard';
 import { FlightCard } from '../../components/search/FlightCard';
 import { CarCard } from '../../components/search/CarCard';
 import { FilterSidebar } from '../../components/search/FilterSidebar';
 import { Button } from '../../components/ui/Button';
+import { mockCars } from '../../utils/mockData';
+import { SearchFilters, Hotel, Flight, Car, SearchState } from '../../types';
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams();
   const dispatch = useDispatch();
-  const { hotels, flights, cars } = useSelector((state: RootState) => state.search) as any;
-  const { searchType } = useSelector((state: RootState) => state.ui) as any;
+  const searchState = useSelector((state: RootState) => state.search as SearchState);
+  const { hotels, flights, cars } = searchState;
 
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
 
   // Get search parameters
-  const type = searchParams.get('type') as 'hotels' | 'flights' | 'cars' || 'hotels';
+  const searchType = searchParams.get('type') as 'hotels' | 'flights' | 'cars' || 'hotels';
   const destination = searchParams.get('destination') || '';
   const checkIn = searchParams.get('checkIn') || '';
   const checkOut = searchParams.get('checkOut') || '';
   const guests = parseInt(searchParams.get('guests') || '2');
   const rooms = parseInt(searchParams.get('rooms') || '1');
-  
-  // Flight parameters
+
+  // Flight-specific parameters
   const from = searchParams.get('from') || '';
   const to = searchParams.get('to') || '';
   const departureDate = searchParams.get('departureDate') || '';
   const passengers = parseInt(searchParams.get('passengers') || '1');
+  const tripType = searchParams.get('tripType') as 'one-way' | 'round-trip' || 'round-trip';
+  const cabinClass = searchParams.get('cabinClass') as 'economy' | 'business' | 'first' || 'economy';
 
-  // Car parameters
+  // Car-specific parameters
   const location = searchParams.get('location') || '';
   const pickupDate = searchParams.get('pickupDate') || '';
   const dropoffDate = searchParams.get('dropoffDate') || '';
-  const age = parseInt(searchParams.get('age') || '25');
 
   useEffect(() => {
-    dispatch(setSearchType(type));
-    
-    if (type === 'hotels') {
+    // Set the search type in the store
+    dispatch(setSearchType(searchType));
+
+    // Perform the search based on type
+    if (searchType === 'hotels' && destination) {
       const results = searchHotels(
         destination,
-        checkIn,
+        checkIn, 
         checkOut,
         guests,
         rooms,
@@ -64,129 +69,144 @@ export default function SearchPage() {
         hotels.sortBy
       );
       dispatch(searchHotelsSuccess({ results, totalPages: Math.ceil(results.length / 10) }));
-    } else if (type === 'flights') {
+    } else if (searchType === 'flights' && from && to) {
       const results = searchFlights(
         from,
-        to,
+        to, 
         departureDate,
         passengers,
         flights.filters,
         flights.sortBy
       );
       dispatch(searchFlightsSuccess({ results, totalPages: Math.ceil(results.length / 10) }));
-    } else if (type === 'cars') {
-      const results = searchCars(
-        location,
-        pickupDate,
-        dropoffDate,
-        age,
-        cars.filters,
-        cars.sortBy
-      );
-      dispatch(searchCarsSuccess({ results, totalPages: Math.ceil(results.length / 10) }));
+    } else if (searchType === 'cars' && location) {
+      // For now, use mock data for cars
+      dispatch(searchCarsSuccess({ results: mockCars, totalPages: Math.ceil(mockCars.length / 10) }));
     }
   }, [
-    type, destination, checkIn, checkOut, guests, rooms, 
-    from, to, departureDate, passengers,
-    location, pickupDate, dropoffDate, age,
-    hotels.filters, hotels.sortBy, 
-    flights.filters, flights.sortBy,
-    cars.filters, cars.sortBy,
-    dispatch
+    searchType, destination, checkIn, checkOut, guests, rooms,
+    from, to, departureDate, passengers, tripType, cabinClass,
+    location, pickupDate, dropoffDate, dispatch, searchParams,
+    hotels.filters, hotels.sortBy, flights.filters, flights.sortBy
   ]);
 
   const getCurrentResults = () => {
-    switch (type) {
-      case 'hotels': return hotels.results;
-      case 'flights': return flights.results;
-      case 'cars': return cars.results;
-      default: return [];
-    }
-  };
-
-  const getCurrentLoading = () => {
-    switch (type) {
-      case 'hotels': return hotels.loading;
-      case 'flights': return flights.loading;
-      case 'cars': return cars.loading;
-      default: return false;
+    switch (searchType) {
+      case 'hotels':
+        return hotels.results;
+      case 'flights':
+        return flights.results;
+      case 'cars':
+        return cars.results;
+      default:
+        return [];
     }
   };
 
   const getCurrentSort = () => {
-    switch (type) {
-      case 'hotels': return hotels.sortBy;
-      case 'flights': return flights.sortBy;
-      case 'cars': return cars.sortBy;
-      default: return 'price';
+    switch (searchType) {
+      case 'hotels':
+        return hotels.sortBy;
+      case 'flights':
+        return flights.sortBy;
+      case 'cars':
+        return cars.sortBy;
+      default:
+        return 'price';
     }
   };
 
   const handleSortChange = (sortBy: string) => {
-    if (type === 'hotels') {
-      dispatch(setHotelSort(sortBy as 'price' | 'rating' | 'distance'));
-    } else if (type === 'flights') {
-      dispatch(setFlightSort(sortBy as 'price' | 'duration' | 'departure'));
-    } else if (type === 'cars') {
-      dispatch(setCarSort(sortBy as 'price' | 'rating' | 'category'));
+    switch (searchType) {
+      case 'hotels':
+        dispatch(setHotelSort(sortBy as 'price' | 'rating' | 'distance'));
+        break;
+      case 'flights':
+        dispatch(setFlightSort(sortBy as 'price' | 'duration' | 'departure'));
+        break;
+      case 'cars':
+        dispatch(setCarSort(sortBy as 'price' | 'rating' | 'category'));
+        break;
     }
   };
 
   const getSortOptions = () => {
-    if (type === 'hotels') {
-      return [
-        { value: 'price', label: 'Price (Low to High)' },
-        { value: 'rating', label: 'Rating (High to Low)' },
-        { value: 'distance', label: 'Distance' },
-      ];
-    } else if (type === 'flights') {
-      return [
-        { value: 'price', label: 'Price (Low to High)' },
-        { value: 'duration', label: 'Duration (Shortest)' },
-        { value: 'departure', label: 'Departure Time' },
-      ];
-    } else {
-      return [
-        { value: 'price', label: 'Price (Low to High)' },
-        { value: 'rating', label: 'Rating (High to Low)' },
-        { value: 'category', label: 'Category' },
-      ];
+    switch (searchType) {
+      case 'hotels':
+        return [
+          { value: 'price', label: 'Price (Low to High)' },
+          { value: 'rating', label: 'Rating (High to Low)' },
+          { value: 'distance', label: 'Distance' },
+        ];
+      case 'flights':
+        return [
+          { value: 'price', label: 'Price (Low to High)' },
+          { value: 'duration', label: 'Duration (Shortest)' },
+          { value: 'departure', label: 'Departure Time' },
+        ];
+      case 'cars':
+        return [
+          { value: 'price', label: 'Price (Low to High)' },
+          { value: 'rating', label: 'Rating (High to Low)' },
+          { value: 'category', label: 'Category' },
+        ];
+      default:
+        return [];
+    }
+  };
+
+  const renderSearchCard = (result: Hotel | Flight | Car) => {
+    switch (searchType) {
+      case 'hotels':
+        return <HotelCard key={result.id} hotel={result as Hotel} />;
+      case 'flights':
+        return <FlightCard key={result.id} flight={result as Flight} />;
+      case 'cars':
+        return <CarCard key={result.id} car={result as Car} />;
+      default:
+        return null;
     }
   };
 
   const getSearchSummary = () => {
-    if (type === 'hotels') {
-      return `${hotels.results.length} hotels in ${destination}`;
-    } else if (type === 'flights') {
-      return `${flights.results.length} flights from ${from} to ${to}`;
-    } else {
-      return `${cars.results.length} cars in ${location}`;
+    switch (searchType) {
+      case 'hotels':
+        return `${destination} • ${checkIn} to ${checkOut} • ${guests} guest${guests > 1 ? 's' : ''}, ${rooms} room${rooms > 1 ? 's' : ''}`;
+      case 'flights':
+        return `${from} to ${to} • ${departureDate} • ${passengers} passenger${passengers > 1 ? 's' : ''} • ${cabinClass}`;
+      case 'cars':
+        return `${location} • ${pickupDate} to ${dropoffDate}`;
+      default:
+        return '';
     }
   };
 
-  const currentResults = getCurrentResults();
-  const currentLoading = getCurrentLoading();
-  const currentSort = getCurrentSort();
+  const results = getCurrentResults();
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Search Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search Summary */}
+        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 capitalize">{type} Search Results</h1>
-              <p className="text-gray-600 mt-1">{getSearchSummary()}</p>
+              <h1 className="text-2xl font-bold text-gray-900 capitalize mb-2">
+                {searchType} Search Results
+              </h1>
+              <p className="text-gray-600">{getSearchSummary()}</p>
+              <p className="text-sm text-gray-500 mt-1">
+                {results.length} {searchType} found
+              </p>
             </div>
             
-            <div className="flex items-center space-x-4">
-              {/* Sort Dropdown */}
+            <div className="flex items-center space-x-4 mt-4 md:mt-0">
+              {/* Sort Options */}
               <div className="flex items-center space-x-2">
-                <SortAsc size={20} className="text-gray-500" />
+                <SortAsc size={16} className="text-gray-500" />
                 <select
-                  value={currentSort}
+                  value={getCurrentSort()}
                   onChange={(e) => handleSortChange(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 >
                   {getSortOptions().map((option) => (
                     <option key={option.value} value={option.value}>
@@ -198,76 +218,88 @@ export default function SearchPage() {
 
               {/* View Mode Toggle */}
               <div className="flex items-center border border-gray-300 rounded-lg">
-                <Button
-                  variant={viewMode === 'list' ? 'primary' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className="rounded-r-none border-r-0"
-                >
-                  <List size={16} />
-                </Button>
-                <Button
-                  variant={viewMode === 'grid' ? 'primary' : 'outline'}
-                  size="sm"
+                <button
                   onClick={() => setViewMode('grid')}
-                  className="rounded-l-none"
+                  className={`p-2 ${viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-500'}`}
                 >
                   <Grid size={16} />
-                </Button>
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 ${viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-500'}`}
+                >
+                  <List size={16} />
+                </button>
               </div>
 
-              {/* Filter Toggle */}
+              {/* Filter Toggle (Mobile) */}
               <Button
                 variant="outline"
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center space-x-2"
+                className="md:hidden"
               >
-                <Filter size={16} />
-                <span>Filters</span>
+                <Filter size={16} className="mr-2" />
+                Filters
               </Button>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-8">
-          {/* Filter Sidebar */}
-          {showFilters && (
-            <div className="w-80 flex-shrink-0">
-              <FilterSidebar searchType={type} />
-            </div>
-          )}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Filters Sidebar */}
+          <div className={`lg:col-span-1 ${showFilters ? 'block' : 'hidden lg:block'}`}>
+            <FilterSidebar searchType={searchType} />
+          </div>
 
           {/* Results */}
-          <div className="flex-1">
-            {currentLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                  <p className="text-gray-600">Searching...</p>
+          <div className="lg:col-span-3">
+            {results.length === 0 ? (
+              <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+                <div className="text-gray-400 mb-4">
+                  <Filter size={48} className="mx-auto" />
                 </div>
-              </div>
-            ) : currentResults.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-600 text-lg">No results found. Try adjusting your search criteria.</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No results found
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  Try adjusting your search criteria or filters to find more options.
+                </p>
+                <Button onClick={() => window.history.back()}>
+                  Modify Search
+                </Button>
               </div>
             ) : (
-              <div className={viewMode === 'grid' ? 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6' : 'space-y-6'}>
-                {currentResults.map((result: any) => {
-                  if (type === 'hotels') {
-                    return <HotelCard key={result.id} hotel={result} />;
-                  } else if (type === 'flights') {
-                    return <FlightCard key={result.id} flight={result} />;
-                  } else {
-                    return <CarCard key={result.id} car={result} />;
-                  }
-                })}
+              <div className={`space-y-6 ${viewMode === 'grid' ? 'md:grid md:grid-cols-1 md:gap-6 md:space-y-0' : ''}`}>
+                {results.map((result) => renderSearchCard(result))}
+              </div>
+            )}
+
+            {/* Load More Button */}
+            {results.length > 0 && results.length >= 20 && (
+              <div className="text-center mt-8">
+                <Button variant="outline" size="lg">
+                  Load More Results
+                </Button>
               </div>
             )}
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Searching for your perfect trip...</p>
+        </div>
+      </div>
+    }>
+      <SearchContent />
+    </Suspense>
   );
 } 

@@ -8,11 +8,13 @@ import { RootState } from '../../store';
 import { setSearchType } from '../../store/slices/uiSlice';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { UIState } from '../../types';
 
 export function SearchBar() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const searchType = useSelector((state: RootState) => (state.ui as any).searchType);
+  const uiState = useSelector((state: RootState) => state.ui as UIState);
+  const searchType = uiState.searchType;
 
   // Hotel search state
   const [hotelSearch, setHotelSearch] = useState({

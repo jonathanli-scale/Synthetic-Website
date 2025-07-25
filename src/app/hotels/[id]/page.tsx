@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
+import Image from 'next/image';
 import { 
   Star, 
   MapPin, 
@@ -28,7 +29,7 @@ import { RootState } from '../../../store';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 
-const amenityIcons: Record<string, any> = {
+const amenityIcons: Record<string, React.ComponentType<{ size: number; className?: string }>> = {
   'Free WiFi': Wifi,
   'Pool': Waves,
   'Restaurant': Utensils,
@@ -78,7 +79,7 @@ export default function HotelDetailsPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">Hotel not found</h2>
-          <p className="text-gray-600 mb-4">The hotel you're looking for doesn't exist.</p>
+          <p className="text-gray-600 mb-4">The hotel you&apos;re looking for doesn&apos;t exist.</p>
           <Button onClick={() => router.back()}>Go Back</Button>
         </div>
       </div>
@@ -160,9 +161,11 @@ export default function HotelDetailsPage() {
             {/* Image Gallery */}
             <div className="relative mb-8">
               <div className="aspect-video bg-gray-200 rounded-xl overflow-hidden">
-                <img
+                <Image
                   src={hotel.images[currentImageIndex]}
                   alt={hotel.name}
+                  width={800}
+                  height={400}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -194,7 +197,7 @@ export default function HotelDetailsPage() {
                       index === currentImageIndex ? 'border-blue-500' : 'border-transparent'
                     }`}
                   >
-                    <img src={image} alt="" className="w-full h-full object-cover" />
+                    <Image src={image} alt="" width={80} height={80} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>

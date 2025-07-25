@@ -57,7 +57,7 @@ export function SignupForm() {
       dispatch(loginSuccess(user));
       dispatch(closeModal('signup'));
       router.push('/dashboard');
-    } catch (error) {
+    } catch {
       setError('root', { message: 'Registration failed. Please try again.' });
     } finally {
       setIsLoading(false);

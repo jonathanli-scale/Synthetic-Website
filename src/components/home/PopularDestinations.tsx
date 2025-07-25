@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { MapPin, Star } from 'lucide-react';
 
 const destinations = [
@@ -67,7 +68,7 @@ export function PopularDestinations() {
             Popular Destinations
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Discover the world's most beloved travel destinations, carefully curated for unforgettable experiences.
+            Discover the world&apos;s most beloved travel destinations, carefully curated for unforgettable experiences.
           </p>
         </div>
         
@@ -79,9 +80,11 @@ export function PopularDestinations() {
               className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300"
             >
               <div className="relative">
-                <img
+                <Image
                   src={destination.image}
                   alt={destination.name}
+                  width={800}
+                  height={400}
                   className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute top-4 right-4 bg-white px-2 py-1 rounded-lg text-sm font-semibold text-blue-600">

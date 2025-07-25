@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ReduxProvider } from "../store/provider";
@@ -16,7 +16,11 @@ export const metadata: Metadata = {
   description: "Your trusted travel companion for booking hotels, flights, and cars worldwide. Experience seamless travel planning with the best deals and customer service.",
   keywords: "travel, booking, hotels, flights, cars, vacation, deals",
   authors: [{ name: "TravelBooker" }],
-  viewport: "width=device-width, initial-scale=1",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({

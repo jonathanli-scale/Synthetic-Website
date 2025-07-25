@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { MapPin, Star, Wifi, Car, Utensils, Waves } from 'lucide-react';
@@ -14,7 +15,7 @@ interface HotelCardProps {
   hotel: Hotel;
 }
 
-const amenityIcons: Record<string, any> = {
+const amenityIcons: Record<string, React.ComponentType<{ size: number; className?: string }>> = {
   'Free WiFi': Wifi,
   'Pool': Waves,
   'Restaurant': Utensils,
@@ -63,9 +64,11 @@ export function HotelCard({ hotel }: HotelCardProps) {
       <div className="md:flex">
         {/* Image Section */}
         <div className="md:w-1/3 relative">
-          <img
+          <Image
             src={hotel.images[0]}
             alt={hotel.name}
+            width={800}
+            height={400}
             className="w-full h-48 md:h-full object-cover"
           />
           {hotel.featured && (

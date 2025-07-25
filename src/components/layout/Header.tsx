@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSelector, useDispatch } from 'react-redux';
 import { Menu, X, User, LogOut, Settings, BookOpen } from 'lucide-react';
 import { useState } from 'react';
@@ -65,7 +66,7 @@ export function Header() {
                 >
                   <div className="h-8 w-8 bg-gray-300 rounded-full flex items-center justify-center">
                     {user?.avatar ? (
-                      <img src={user.avatar} alt="Avatar" className="h-8 w-8 rounded-full" />
+                      <Image src={user.avatar} alt="Avatar" width={32} height={32} className="h-8 w-8 rounded-full" />
                     ) : (
                       <User size={16} />
                     )}

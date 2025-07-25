@@ -7,10 +7,12 @@ import { RootState } from '../../store';
 import { closeAllModals } from '../../store/slices/uiSlice';
 import { LoginForm } from '../auth/LoginForm';
 import { SignupForm } from '../auth/SignupForm';
+import { UIState } from '../../types';
 
 export function AuthModals() {
   const dispatch = useDispatch();
-  const modals = useSelector((state: RootState) => (state.ui as any).modals);
+  const uiState = useSelector((state: RootState) => state.ui as UIState);
+  const modals = uiState.modals;
 
 
   useEffect(() => {
