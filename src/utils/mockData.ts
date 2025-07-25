@@ -482,8 +482,8 @@ export function searchHotels(
 ): Hotel[] {
   let results = [...mockHotels];
 
-  // Filter by destination
-  if (destination) {
+  // Filter by destination - only filter if destination is provided and not a default/fallback value
+  if (destination && destination !== 'Paris' && destination !== 'Popular destinations') {
     results = results.filter(hotel =>
       hotel.location.city.toLowerCase().includes(destination.toLowerCase()) ||
       hotel.location.country.toLowerCase().includes(destination.toLowerCase()) ||
@@ -491,15 +491,15 @@ export function searchHotels(
     );
   }
 
-  // Apply filters
+  // Apply filters with null safety
   if (filters) {
-    if (filters.priceRange) {
+    if (filters.priceRange && filters.priceRange.length === 2) {
       results = results.filter(hotel => 
         hotel.price >= filters.priceRange![0] && hotel.price <= filters.priceRange![1]
       );
     }
 
-    if (filters.rating) {
+    if (filters.rating && filters.rating > 0) {
       results = results.filter(hotel => hotel.rating >= filters.rating!);
     }
 
@@ -594,22 +594,23 @@ export function searchFlights(
     priceRange?: [number, number];
     stops?: number;
     cabinClass?: 'economy' | 'business' | 'first';
+    amenities?: string[];
   },
   sortBy: 'price' | 'duration' | 'departure' = 'price'
 ): Flight[] {
   let results = [...mockFlights];
 
-  // Filter by route
-  if (from && to) {
+  // Filter by route - only filter if both from/to are provided and not default values
+  if (from && to && from !== 'New York' && to !== 'Paris' && from !== 'Popular origins' && to !== 'Popular destinations') {
     results = results.filter(flight =>
       flight.from.city.toLowerCase().includes(from.toLowerCase()) &&
       flight.to.city.toLowerCase().includes(to.toLowerCase())
     );
   }
 
-  // Apply filters
+  // Apply filters with null safety
   if (filters) {
-    if (filters.priceRange) {
+    if (filters.priceRange && filters.priceRange.length === 2) {
       results = results.filter(flight => 
         flight.price >= filters.priceRange![0] && flight.price <= filters.priceRange![1]
       );
@@ -889,13 +890,14 @@ export function searchCars(
     priceRange?: [number, number];
     category?: string;
     features?: string[];
+    amenities?: string[];
   },
   sortBy: 'price' | 'rating' | 'category' = 'price'
 ): Car[] {
   let results = [...mockCars];
 
-  // Filter by location
-  if (location) {
+  // Filter by location - only filter if location is provided and not a default value
+  if (location && location !== 'Los Angeles' && location !== 'Popular locations') {
     results = results.filter(car =>
       car.location.city.toLowerCase().includes(location.toLowerCase()) ||
       car.location.pickupAddress.toLowerCase().includes(location.toLowerCase())
@@ -905,9 +907,9 @@ export function searchCars(
   // Filter by age requirement
   results = results.filter(car => age >= car.rental.requirements.minAge);
 
-  // Apply filters
+  // Apply filters with null safety
   if (filters) {
-    if (filters.priceRange) {
+    if (filters.priceRange && filters.priceRange.length === 2) {
       results = results.filter(car => 
         car.price >= filters.priceRange![0] && car.price <= filters.priceRange![1]
       );
@@ -921,6 +923,24 @@ export function searchCars(
       results = results.filter(car => {
         return filters.features!.some(feature => {
           switch (feature) {
+            case 'automatic':
+              return car.features.transmission === 'automatic';
+            case 'airConditioning':
+              return car.features.airConditioning;
+            case 'gps':
+              return car.features.gps;
+            default:
+              return false;
+          }
+        });
+      });
+    }
+
+    // Support for amenities field (same as features for cars)
+    if (filters.amenities && filters.amenities.length > 0) {
+      results = results.filter(car => {
+        return filters.amenities!.some(amenity => {
+          switch (amenity) {
             case 'automatic':
               return car.features.transmission === 'automatic';
             case 'airConditioning':

@@ -14,13 +14,12 @@ import {
   setCarSort
 } from '../../store/slices/searchSlice';
 import { setSearchType } from '../../store/slices/uiSlice';
-import { searchHotels, searchFlights } from '../../utils/mockData';
+import { searchHotels, searchFlights, searchCars } from '../../utils/mockData';
 import { HotelCard } from '../../components/search/HotelCard';
 import { FlightCard } from '../../components/search/FlightCard';
 import { CarCard } from '../../components/search/CarCard';
 import { FilterSidebar } from '../../components/search/FilterSidebar';
 import { Button } from '../../components/ui/Button';
-import { mockCars } from '../../utils/mockData';
 import { SearchFilters, Hotel, Flight, Car, SearchState } from '../../types';
 
 function SearchContent() {
@@ -57,37 +56,45 @@ function SearchContent() {
     // Set the search type in the store
     dispatch(setSearchType(searchType));
 
-    // Perform the search based on type
-    if (searchType === 'hotels' && destination) {
+    // Perform the search based on type with fallback for missing parameters
+    if (searchType === 'hotels') {
       const results = searchHotels(
-        destination,
-        checkIn, 
-        checkOut,
+        destination || 'Popular destinations', // Will show all hotels when no specific destination
+        checkIn || new Date(Date.now() + 86400000).toISOString().split('T')[0], // Tomorrow
+        checkOut || new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0], // Day after tomorrow
         guests,
         rooms,
         hotels.filters,
         hotels.sortBy
       );
       dispatch(searchHotelsSuccess({ results, totalPages: Math.ceil(results.length / 10) }));
-    } else if (searchType === 'flights' && from && to) {
+    } else if (searchType === 'flights') {
       const results = searchFlights(
-        from,
-        to, 
-        departureDate,
+        from || 'Popular origins', // Will show all flights when no specific route
+        to || 'Popular destinations',
+        departureDate || new Date(Date.now() + 86400000).toISOString().split('T')[0],
         passengers,
         flights.filters,
         flights.sortBy
       );
       dispatch(searchFlightsSuccess({ results, totalPages: Math.ceil(results.length / 10) }));
-    } else if (searchType === 'cars' && location) {
-      // For now, use mock data for cars
-      dispatch(searchCarsSuccess({ results: mockCars, totalPages: Math.ceil(mockCars.length / 10) }));
+    } else if (searchType === 'cars') {
+      // Use the searchCars function consistently
+      const results = searchCars(
+        location || 'Popular locations', // Will show all cars when no specific location
+        pickupDate || new Date(Date.now() + 86400000).toISOString().split('T')[0],
+        dropoffDate || new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0],
+        25, // Default age
+        cars.filters,
+        cars.sortBy
+      );
+      dispatch(searchCarsSuccess({ results, totalPages: Math.ceil(results.length / 10) }));
     }
   }, [
     searchType, destination, checkIn, checkOut, guests, rooms,
     from, to, departureDate, passengers, tripType, cabinClass,
     location, pickupDate, dropoffDate, dispatch, searchParams,
-    hotels.filters, hotels.sortBy, flights.filters, flights.sortBy
+    hotels.filters, hotels.sortBy, flights.filters, flights.sortBy, cars.filters, cars.sortBy
   ]);
 
   const getCurrentResults = () => {
@@ -171,11 +178,20 @@ function SearchContent() {
   const getSearchSummary = () => {
     switch (searchType) {
       case 'hotels':
-        return `${destination} • ${checkIn} to ${checkOut} • ${guests} guest${guests > 1 ? 's' : ''}, ${rooms} room${rooms > 1 ? 's' : ''}`;
+        const hotelDestination = destination || 'Popular destinations';
+        const hotelCheckIn = checkIn || 'Flexible dates';
+        const hotelCheckOut = checkOut || 'Flexible dates';
+        return `${hotelDestination} • ${hotelCheckIn} to ${hotelCheckOut} • ${guests} guest${guests > 1 ? 's' : ''}, ${rooms} room${rooms > 1 ? 's' : ''}`;
       case 'flights':
-        return `${from} to ${to} • ${departureDate} • ${passengers} passenger${passengers > 1 ? 's' : ''} • ${cabinClass}`;
+        const flightFrom = from || 'Popular origins';
+        const flightTo = to || 'Popular destinations';
+        const flightDate = departureDate || 'Flexible dates';
+        return `${flightFrom} to ${flightTo} • ${flightDate} • ${passengers} passenger${passengers > 1 ? 's' : ''} • ${cabinClass}`;
       case 'cars':
-        return `${location} • ${pickupDate} to ${dropoffDate}`;
+        const carLocation = location || 'Popular locations';
+        const carPickup = pickupDate || 'Flexible dates';
+        const carDropoff = dropoffDate || 'Flexible dates';
+        return `${carLocation} • ${carPickup} to ${carDropoff}`;
       default:
         return '';
     }
@@ -196,6 +212,9 @@ function SearchContent() {
               <p className="text-gray-600">{getSearchSummary()}</p>
               <p className="text-sm text-gray-500 mt-1">
                 {results.length} {searchType} found
+                {(!destination && !from && !location) && (
+                  <span className="text-blue-600 ml-2">• Showing popular options</span>
+                )}
               </p>
             </div>
             
