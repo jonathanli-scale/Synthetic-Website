@@ -194,7 +194,7 @@ export default function FlightDetailsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div>
                   <h3 className="font-medium text-gray-900 mb-2">Aircraft</h3>
-                  <p className="text-gray-600">Boeing 777-300ER</p>
+                  <p className="text-gray-600">{flight.aircraft?.name || 'Boeing 777-300ER'}</p>
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900 mb-2">Cabin Class</h3>
@@ -202,14 +202,63 @@ export default function FlightDetailsPage() {
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900 mb-2">Flight Distance</h3>
-                  <p className="text-gray-600">3,459 miles</p>
+                  <p className="text-gray-600">{flight.distance ? `${flight.distance.toLocaleString()} miles` : '3,459 miles'}</p>
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900 mb-2">Flight Time</h3>
                   <p className="text-gray-600">{duration}</p>
                 </div>
               </div>
+              
+              {/* Enhanced Details */}
+              {flight.seatMap && (
+                <div className="border-t border-gray-200 pt-6 mt-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                      <h3 className="font-medium text-gray-900 mb-2">Seat Configuration</h3>
+                      <p className="text-gray-600">{flight.seatMap.seatConfiguration}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900 mb-2">Total Seats</h3>
+                      <p className="text-gray-600">{flight.seatMap.totalSeats}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900 mb-2">Available Seats</h3>
+                      <p className={`font-medium ${flight.seatMap.availableSeats < 10 ? 'text-red-600' : 'text-green-600'}`}>
+                        {flight.seatMap.availableSeats} remaining
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
+
+            {/* Flight Amenities */}
+            {flight.amenities && (
+              <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">In-Flight Amenities</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-3 h-3 rounded-full ${flight.amenities.wifi ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                    <span className={flight.amenities.wifi ? 'text-gray-900' : 'text-gray-500'}>Wi-Fi</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-3 h-3 rounded-full ${flight.amenities.entertainment ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                    <span className={flight.amenities.entertainment ? 'text-gray-900' : 'text-gray-500'}>Entertainment</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-3 h-3 rounded-full ${flight.amenities.power ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                    <span className={flight.amenities.power ? 'text-gray-900' : 'text-gray-500'}>Power Outlets</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-3 h-3 rounded-full ${flight.amenities.meals.length > 0 ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                    <span className={flight.amenities.meals.length > 0 ? 'text-gray-900' : 'text-gray-500'}>
+                      {flight.amenities.meals.length > 0 ? flight.amenities.meals.join(', ') : 'Meals'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Baggage Information */}
             <div className="bg-white rounded-xl shadow-sm p-6 mb-8">

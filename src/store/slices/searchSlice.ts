@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { SearchState, Hotel, Flight, SearchFilters } from '../../types';
+import { SearchState, Hotel, Flight, Car, SearchFilters } from '../../types';
 
 const initialState: SearchState = {
   hotels: {
@@ -20,6 +20,18 @@ const initialState: SearchState = {
     error: null,
     filters: {
       priceRange: [0, 2000],
+      amenities: [],
+    },
+    sortBy: 'price',
+    page: 1,
+    totalPages: 1,
+  },
+  cars: {
+    results: [],
+    loading: false,
+    error: null,
+    filters: {
+      priceRange: [0, 300],
       amenities: [],
     },
     sortBy: 'price',
@@ -80,16 +92,35 @@ const searchSlice = createSlice({
       state.flights.page = action.payload;
     },
 
-    // Clear search results
-    clearHotelResults: (state) => {
-      state.hotels.results = [];
-      state.hotels.page = 1;
-      state.hotels.totalPages = 1;
+    // Car search actions
+    searchCarsStart: (state) => {
+      state.cars.loading = true;
+      state.cars.error = null;
     },
-    clearFlightResults: (state) => {
+    searchCarsSuccess: (state, action: PayloadAction<{ results: Car[]; totalPages: number }>) => {
+      state.cars.loading = false;
+      state.cars.results = action.payload.results;
+      state.cars.totalPages = action.payload.totalPages;
+    },
+    searchCarsFailure: (state, action: PayloadAction<string>) => {
+      state.cars.loading = false;
+      state.cars.error = action.payload;
+    },
+    setCarFilters: (state, action: PayloadAction<Partial<SearchFilters>>) => {
+      state.cars.filters = { ...state.cars.filters, ...action.payload };
+    },
+    setCarSort: (state, action: PayloadAction<'price' | 'rating' | 'category'>) => {
+      state.cars.sortBy = action.payload;
+    },
+    setCarPage: (state, action: PayloadAction<number>) => {
+      state.cars.page = action.payload;
+    },
+
+    // Clear all search results
+    clearSearchResults: (state) => {
+      state.hotels.results = [];
       state.flights.results = [];
-      state.flights.page = 1;
-      state.flights.totalPages = 1;
+      state.cars.results = [];
     },
   },
 });
@@ -107,8 +138,13 @@ export const {
   setFlightFilters,
   setFlightSort,
   setFlightPage,
-  clearHotelResults,
-  clearFlightResults,
+  searchCarsStart,
+  searchCarsSuccess,
+  searchCarsFailure,
+  setCarFilters,
+  setCarSort,
+  setCarPage,
+  clearSearchResults,
 } = searchSlice.actions;
 
 export default searchSlice.reducer; 

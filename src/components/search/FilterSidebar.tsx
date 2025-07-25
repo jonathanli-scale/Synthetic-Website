@@ -4,17 +4,19 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { RootState } from '../../store';
-import { setHotelFilters, setFlightFilters } from '../../store/slices/searchSlice';
+import { setHotelFilters, setFlightFilters, setCarFilters } from '../../store/slices/searchSlice';
 import { Button } from '../ui/Button';
 
 interface FilterSidebarProps {
-  searchType: 'hotels' | 'flights';
+  searchType: 'hotels' | 'flights' | 'cars';
 }
 
 export function FilterSidebar({ searchType }: FilterSidebarProps) {
   const dispatch = useDispatch();
-  const { hotels, flights } = useSelector((state: RootState) => state.search);
-  const currentFilters = searchType === 'hotels' ? hotels.filters : flights.filters;
+  const searchState = useSelector((state: RootState) => state.search) as any;
+  const currentFilters = searchType === 'hotels' ? searchState.hotels.filters : 
+                        searchType === 'flights' ? searchState.flights.filters : 
+                        searchState.cars.filters;
 
   const [expandedSections, setExpandedSections] = useState({
     price: true,
@@ -48,13 +50,15 @@ export function FilterSidebar({ searchType }: FilterSidebarProps) {
   const handleAmenityToggle = (amenity: string) => {
     const currentAmenities = currentFilters.amenities || [];
     const newAmenities = currentAmenities.includes(amenity)
-      ? currentAmenities.filter(a => a !== amenity)
+      ? currentAmenities.filter((a: string) => a !== amenity)
       : [...currentAmenities, amenity];
 
     if (searchType === 'hotels') {
       dispatch(setHotelFilters({ amenities: newAmenities }));
-    } else {
+    } else if (searchType === 'flights') {
       dispatch(setFlightFilters({ amenities: newAmenities }));
+    } else {
+      dispatch(setCarFilters({ amenities: newAmenities }));
     }
   };
 

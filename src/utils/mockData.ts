@@ -1,4 +1,4 @@
-import { Hotel, Flight } from '../types';
+import { Hotel, Flight, Car } from '../types';
 
 export const mockHotels: Hotel[] = [
   {
@@ -395,6 +395,22 @@ export const mockFlights: Flight[] = [
       checked: '1 x 23kg',
     },
     cancellationPolicy: 'Refundable with fee',
+    aircraft: {
+      type: 'Boeing 777-300ER',
+      name: 'Boeing 777-300ER'
+    },
+    distance: 3459,
+    amenities: {
+      wifi: true,
+      entertainment: true,
+      meals: ['Dinner', 'Breakfast'],
+      power: true
+    },
+    seatMap: {
+      totalSeats: 396,
+      availableSeats: 23,
+      seatConfiguration: '3-4-3'
+    }
   },
   {
     id: 'f2',
@@ -512,6 +528,63 @@ export function searchHotels(
   return results;
 }
 
+// // Car search function
+// export function searchCars(
+//   location: string,
+//   pickupDate: string,
+//   dropoffDate: string,
+//   age: number,
+//   filters: SearchFilters,
+//   sortBy: string
+// ): Car[] {
+//   let results = [...mockCars];
+
+//   // Location filter (basic implementation)
+//   if (location) {
+//     results = results.filter(car => 
+//       car.location.city.toLowerCase().includes(location.toLowerCase()) ||
+//       car.location.pickupAddress.toLowerCase().includes(location.toLowerCase())
+//     );
+//   }
+
+//   // Age restriction filter
+//   results = results.filter(car => age >= car.rental.requirements.minAge);
+
+//   // Price range filter
+//   if (filters.priceRange) {
+//     results = results.filter(car => 
+//       car.price >= filters.priceRange![0] && car.price <= filters.priceRange![1]
+//     );
+//   }
+
+//   // Category filter (using amenities as category filter)
+//   if (filters.amenities && filters.amenities.length > 0) {
+//     results = results.filter(car => 
+//       filters.amenities!.some(amenity => 
+//         car.category.toLowerCase().includes(amenity.toLowerCase()) ||
+//         car.features.transmission.toLowerCase().includes(amenity.toLowerCase()) ||
+//         car.features.fuelType.toLowerCase().includes(amenity.toLowerCase())
+//       )
+//     );
+//   }
+
+//   // Sort results
+//   results.sort((a, b) => {
+//     switch (sortBy) {
+//       case 'price':
+//         return a.price - b.price;
+//       case 'rating':
+//         return b.rental.rating - a.rental.rating;
+//       case 'category':
+//         return a.category.localeCompare(b.category);
+//       default:
+//         return 0;
+//     }
+//   });
+
+//   return results;
+// }
+
 export function searchFlights(
   from: string,
   to: string,
@@ -566,4 +639,316 @@ export function searchFlights(
   });
 
   return results;
+}
+
+// Car rental mock data
+export const mockCars: Car[] = [
+  {
+    id: '1',
+    name: 'Economy Toyota Corolla',
+    category: 'economy',
+    brand: 'Toyota',
+    model: 'Corolla',
+    year: 2023,
+    images: ['https://images.unsplash.com/photo-1549924231-f129b911e442?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'],
+    price: 35,
+    originalPrice: 45,
+    location: {
+      pickupAddress: '123 Airport Dr, Los Angeles, CA',
+      city: 'Los Angeles',
+      country: 'USA',
+      coordinates: { lat: 34.0522, lng: -118.2437 }
+    },
+    features: {
+      seats: 5,
+      doors: 4,
+      transmission: 'automatic',
+      fuelType: 'gasoline',
+      airConditioning: true,
+      gps: true
+    },
+    rental: {
+      company: 'Budget Rent a Car',
+      rating: 4.2,
+      reviewCount: 1245,
+      pickupInstructions: 'Located at Terminal 1, follow signs to Rental Car Center',
+      requirements: {
+        minAge: 21,
+        license: ['US', 'International'],
+        creditCard: true
+      }
+    },
+    insurance: {
+      included: ['Basic liability', 'Collision damage waiver'],
+      optional: [
+        { name: 'Personal accident insurance', description: 'Covers medical expenses', price: 8 },
+        { name: 'Roadside assistance', description: '24/7 roadside help', price: 5 }
+      ]
+    },
+    mileage: {
+      unlimited: true
+    },
+    cancellationPolicy: 'Free cancellation up to 24 hours before pickup',
+    available: true
+  },
+  {
+    id: '2',
+    name: 'Compact Honda Civic',
+    category: 'compact',
+    brand: 'Honda',
+    model: 'Civic',
+    year: 2023,
+    images: ['https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'],
+    price: 42,
+    location: {
+      pickupAddress: '456 Downtown Center, San Francisco, CA',
+      city: 'San Francisco',
+      country: 'USA',
+      coordinates: { lat: 37.7749, lng: -122.4194 }
+    },
+    features: {
+      seats: 5,
+      doors: 4,
+      transmission: 'automatic',
+      fuelType: 'gasoline',
+      airConditioning: true,
+      gps: true
+    },
+    rental: {
+      company: 'Hertz',
+      rating: 4.5,
+      reviewCount: 892,
+      pickupInstructions: 'Downtown location, entrance on 2nd Street',
+      requirements: {
+        minAge: 21,
+        license: ['US', 'International'],
+        creditCard: true
+      }
+    },
+    insurance: {
+      included: ['Basic liability'],
+      optional: [
+        { name: 'Full coverage', description: 'Comprehensive protection', price: 15 },
+        { name: 'Personal effects coverage', description: 'Protects belongings', price: 7 }
+      ]
+    },
+    mileage: {
+      unlimited: true
+    },
+    cancellationPolicy: 'Free cancellation up to 48 hours before pickup',
+    available: true
+  },
+  {
+    id: '3',
+    name: 'Midsize Nissan Altima',
+    category: 'midsize',
+    brand: 'Nissan',
+    model: 'Altima',
+    year: 2023,
+    images: ['https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'],
+    price: 48,
+    originalPrice: 58,
+    location: {
+      pickupAddress: '789 Union Station, Chicago, IL',
+      city: 'Chicago',
+      country: 'USA',
+      coordinates: { lat: 41.8781, lng: -87.6298 }
+    },
+    features: {
+      seats: 5,
+      doors: 4,
+      transmission: 'automatic',
+      fuelType: 'gasoline',
+      airConditioning: true,
+      gps: true
+    },
+    rental: {
+      company: 'Enterprise',
+      rating: 4.3,
+      reviewCount: 1567,
+      pickupInstructions: 'Located on Level B1, follow Enterprise signs',
+      requirements: {
+        minAge: 25,
+        license: ['US', 'International'],
+        creditCard: true
+      }
+    },
+    insurance: {
+      included: ['Basic liability', 'Theft protection'],
+      optional: [
+        { name: 'Premium protection', description: 'Zero deductible coverage', price: 18 }
+      ]
+    },
+    mileage: {
+      unlimited: true
+    },
+    cancellationPolicy: 'Free cancellation up to 24 hours before pickup',
+    available: true
+  },
+  {
+    id: '4',
+    name: 'Luxury BMW 3 Series',
+    category: 'luxury',
+    brand: 'BMW',
+    model: '3 Series',
+    year: 2024,
+    images: ['https://images.unsplash.com/photo-1555215695-3004980ad54e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'],
+    price: 89,
+    originalPrice: 109,
+    location: {
+      pickupAddress: '321 Luxury Auto Plaza, Miami, FL',
+      city: 'Miami',
+      country: 'USA',
+      coordinates: { lat: 25.7617, lng: -80.1918 }
+    },
+    features: {
+      seats: 5,
+      doors: 4,
+      transmission: 'automatic',
+      fuelType: 'gasoline',
+      airConditioning: true,
+      gps: true
+    },
+    rental: {
+      company: 'Avis Prestige',
+      rating: 4.7,
+      reviewCount: 324,
+      pickupInstructions: 'Valet service available, premium counter',
+      requirements: {
+        minAge: 25,
+        license: ['US', 'International'],
+        creditCard: true
+      }
+    },
+    insurance: {
+      included: ['Comprehensive coverage', 'Roadside assistance'],
+      optional: [
+        { name: 'Luxury protection package', description: 'Premium coverage for luxury vehicles', price: 25 }
+      ]
+    },
+    mileage: {
+      unlimited: true
+    },
+    cancellationPolicy: 'Free cancellation up to 72 hours before pickup',
+    available: true
+  },
+  {
+    id: '5',
+    name: 'SUV Ford Explorer',
+    category: 'suv',
+    brand: 'Ford',
+    model: 'Explorer',
+    year: 2023,
+    images: ['https://images.unsplash.com/photo-1544636331-e26879cd4d9b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'],
+    price: 65,
+    location: {
+      pickupAddress: '654 Mountain View Rd, Denver, CO',
+      city: 'Denver',
+      country: 'USA',
+      coordinates: { lat: 39.7392, lng: -104.9903 }
+    },
+    features: {
+      seats: 7,
+      doors: 4,
+      transmission: 'automatic',
+      fuelType: 'gasoline',
+      airConditioning: true,
+      gps: true
+    },
+    rental: {
+      company: 'National Car Rental',
+      rating: 4.4,
+      reviewCount: 678,
+      pickupInstructions: 'Outdoor lot, shuttle service available',
+      requirements: {
+        minAge: 25,
+        license: ['US', 'International'],
+        creditCard: true
+      }
+    },
+    insurance: {
+      included: ['Basic liability'],
+      optional: [
+        { name: 'Adventure package', description: 'Off-road and outdoor activity coverage', price: 12 }
+      ]
+    },
+    mileage: {
+      unlimited: true
+    },
+    cancellationPolicy: 'Free cancellation up to 24 hours before pickup',
+    available: true
+  }
+];
+
+export function searchCars(
+  location: string,
+  pickupDate: string,
+  dropoffDate: string,
+  age: number,
+  filters?: {
+    priceRange?: [number, number];
+    category?: string;
+    features?: string[];
+  },
+  sortBy: 'price' | 'rating' | 'category' = 'price'
+): Car[] {
+  let results = [...mockCars];
+
+  // Filter by location
+  if (location) {
+    results = results.filter(car =>
+      car.location.city.toLowerCase().includes(location.toLowerCase()) ||
+      car.location.pickupAddress.toLowerCase().includes(location.toLowerCase())
+    );
+  }
+
+  // Filter by age requirement
+  results = results.filter(car => age >= car.rental.requirements.minAge);
+
+  // Apply filters
+  if (filters) {
+    if (filters.priceRange) {
+      results = results.filter(car => 
+        car.price >= filters.priceRange![0] && car.price <= filters.priceRange![1]
+      );
+    }
+
+    if (filters.category) {
+      results = results.filter(car => car.category === filters.category);
+    }
+
+    if (filters.features && filters.features.length > 0) {
+      results = results.filter(car => {
+        return filters.features!.some(feature => {
+          switch (feature) {
+            case 'automatic':
+              return car.features.transmission === 'automatic';
+            case 'airConditioning':
+              return car.features.airConditioning;
+            case 'gps':
+              return car.features.gps;
+            default:
+              return false;
+          }
+        });
+      });
+    }
+  }
+
+  // Sort results
+  results.sort((a, b) => {
+    switch (sortBy) {
+      case 'price':
+        return a.price - b.price;
+      case 'rating':
+        return b.rental.rating - a.rental.rating;
+      case 'category':
+        return a.category.localeCompare(b.category);
+      default:
+        return 0;
+    }
+  });
+
+  // Only return available cars
+  return results.filter(car => car.available);
 } 

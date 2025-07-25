@@ -147,7 +147,11 @@ export function FlightCard({ flight }: FlightCardProps) {
         </div>
         
         <div className="flex space-x-2">
-          <Button variant="outline" size="sm">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => router.push(`/flights/${flight.id}`)}
+          >
             View Details
           </Button>
           <Button size="sm" onClick={handleFlightSelection}>

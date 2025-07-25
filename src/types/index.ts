@@ -114,6 +114,79 @@ export interface Flight {
     checked: string;
   };
   cancellationPolicy: string;
+  // Enhanced flight details
+  aircraft?: {
+    type: string;
+    name: string;
+  };
+  distance?: number; // miles
+  amenities?: {
+    wifi: boolean;
+    entertainment: boolean;
+    meals: string[];
+    power: boolean;
+  };
+  seatMap?: {
+    totalSeats: number;
+    availableSeats: number;
+    seatConfiguration: string; // e.g., "3-3-3"
+  };
+}
+
+// Car types
+export interface Car {
+  id: string;
+  name: string;
+  category: 'economy' | 'compact' | 'midsize' | 'fullsize' | 'luxury' | 'suv' | 'convertible';
+  brand: string;
+  model: string;
+  year: number;
+  images: string[];
+  price: number; // per day
+  originalPrice?: number;
+  location: {
+    pickupAddress: string;
+    city: string;
+    country: string;
+    coordinates: {
+      lat: number;
+      lng: number;
+    };
+  };
+  features: {
+    seats: number;
+    doors: number;
+    transmission: 'automatic' | 'manual';
+    fuelType: 'gasoline' | 'hybrid' | 'electric';
+    airConditioning: boolean;
+    gps: boolean;
+  };
+  rental: {
+    company: string;
+    rating: number;
+    reviewCount: number;
+    pickupInstructions: string;
+    requirements: {
+      minAge: number;
+      license: string[];
+      creditCard: boolean;
+    };
+  };
+  insurance: {
+    included: string[];
+    optional: Array<{
+      name: string;
+      description: string;
+      price: number;
+    }>;
+  };
+  mileage: {
+    unlimited: boolean;
+    limit?: number; // miles per day
+    overage?: number; // cost per extra mile
+  };
+  cancellationPolicy: string;
+  available: boolean;
 }
 
 // Booking types
@@ -135,6 +208,15 @@ export interface Booking {
   flight?: {
     flightId: string;
     passengers: Passenger[];
+  };
+  car?: {
+    carId: string;
+    pickupDate: string;
+    dropoffDate: string;
+    pickupLocation: string;
+    dropoffLocation: string;
+    driverAge: number;
+    insurance: string[];
   };
 }
 
@@ -203,6 +285,15 @@ export interface SearchState {
     error: string | null;
     filters: SearchFilters;
     sortBy: 'price' | 'duration' | 'departure';
+    page: number;
+    totalPages: number;
+  };
+  cars: {
+    results: Car[];
+    loading: boolean;
+    error: string | null;
+    filters: SearchFilters;
+    sortBy: 'price' | 'rating' | 'category';
     page: number;
     totalPages: number;
   };
