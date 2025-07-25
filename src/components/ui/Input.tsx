@@ -36,9 +36,9 @@ export function Input({
         <input
           id={inputId}
           className={clsx(
-                    'block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500',
-        icon && 'pl-10',
-        error && 'border-red-300 focus:border-red-500 focus:ring-red-500',
+            'block w-full px-3 py-2 text-gray-900 placeholder-gray-500 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors',
+            icon && 'pl-10',
+            error && 'border-red-300 text-red-900 placeholder-red-400 focus:border-red-500 focus:ring-red-500',
             className
           )}
           {...props}

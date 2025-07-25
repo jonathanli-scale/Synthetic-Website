@@ -1,7 +1,14 @@
+'use client';
+
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useDispatch, useSelector } from 'react-redux';
 import { MapPin, Star, Wifi, Car, Utensils, Waves } from 'lucide-react';
 import { Hotel } from '../../types';
 import { Button } from '../ui/Button';
+import { startBooking } from '../../store/slices/bookingSlice';
+import { openModal } from '../../store/slices/uiSlice';
+import { RootState } from '../../store';
 
 interface HotelCardProps {
   hotel: Hotel;
@@ -15,10 +22,41 @@ const amenityIcons: Record<string, any> = {
 };
 
 export function HotelCard({ hotel }: HotelCardProps) {
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state: RootState) => state.user);
+  
   const savings = hotel.originalPrice ? hotel.originalPrice - hotel.price : 0;
   const savingsPercentage = hotel.originalPrice 
     ? Math.round((savings / hotel.originalPrice) * 100) 
     : 0;
+
+  const handleQuickBooking = () => {
+    if (!isAuthenticated) {
+      dispatch(openModal('login'));
+      return;
+    }
+
+    // Quick booking with default values
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const dayAfter = new Date();
+    dayAfter.setDate(dayAfter.getDate() + 2);
+
+    dispatch(startBooking({
+      type: 'hotel',
+      totalPrice: hotel.price,
+      hotel: {
+        hotelId: hotel.id,
+        roomId: hotel.rooms[0]?.id || 'standard',
+        checkIn: tomorrow.toISOString().split('T')[0],
+        checkOut: dayAfter.toISOString().split('T')[0],
+        guests: 2,
+      }
+    }));
+
+    router.push('/book');
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
@@ -126,7 +164,7 @@ export function HotelCard({ hotel }: HotelCardProps) {
                   View Details
                 </Button>
               </Link>
-              <Button size="sm">
+              <Button size="sm" onClick={handleQuickBooking}>
                 Book Now
               </Button>
             </div>

@@ -25,6 +25,7 @@ import { loadBookingsSuccess } from '../../store/slices/bookingSlice';
 import { logout } from '../../store/slices/userSlice';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { bookingAPI } from '../../utils/api';
 
 // Mock user data
 const mockUser = {
@@ -36,80 +37,14 @@ const mockUser = {
   createdAt: '2023-01-15T00:00:00Z',
 };
 
-// Mock bookings data
-const mockBookings = [
-  {
-    id: 'booking_1',
-    type: 'hotel' as const,
-    status: 'confirmed' as const,
-    bookingDate: '2024-01-15T10:30:00Z',
-    totalPrice: 450,
-    travelerInfo: {
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john.doe@example.com',
-      phone: '+1-555-0123',
-      address: {
-        street: '123 Main St',
-        city: 'New York',
-        state: 'NY',
-        zipCode: '10001',
-        country: 'USA',
-      },
-    },
-    paymentInfo: {
-      method: 'card' as const,
-      cardNumber: '****-****-****-1234',
-    },
-    hotel: {
-      hotelId: '1',
-      roomId: 'r1',
-      checkIn: '2024-02-15',
-      checkOut: '2024-02-18',
-      guests: 2,
-    },
-  },
-  {
-    id: 'booking_2',
-    type: 'flight' as const,
-    status: 'confirmed' as const,
-    bookingDate: '2024-01-10T14:20:00Z',
-    totalPrice: 720,
-    travelerInfo: {
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john.doe@example.com',
-      phone: '+1-555-0123',
-      address: {
-        street: '123 Main St',
-        city: 'New York',
-        state: 'NY',
-        zipCode: '10001',
-        country: 'USA',
-      },
-    },
-    paymentInfo: {
-      method: 'card' as const,
-      cardNumber: '****-****-****-5678',
-    },
-    flight: {
-      flightId: 'f1',
-      passengers: [
-        {
-          firstName: 'John',
-          lastName: 'Doe',
-          dateOfBirth: '1990-05-15',
-        },
-      ],
-    },
-  },
-];
+// Mock bookings data - Start with empty array for clean account
+const mockBookings: never[] = [];
 
 export default function DashboardPage() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { bookings } = useSelector((state: RootState) => state.booking);
-  const { isAuthenticated, user } = useSelector((state: RootState) => state.user);
+  const { bookings } = useSelector((state: RootState) => (state.booking as any));
+  const { isAuthenticated, user } = useSelector((state: RootState) => (state.user as any));
   
   const [activeTab, setActiveTab] = useState('bookings');
   const [showBookingDetails, setShowBookingDetails] = useState<string | null>(null);
@@ -122,8 +57,19 @@ export default function DashboardPage() {
   });
 
   useEffect(() => {
-    // Load bookings (in real app, this would be an API call)
-    dispatch(loadBookingsSuccess(mockBookings));
+    // Load bookings from API or fallback to empty array
+    const loadBookings = async () => {
+      try {
+                 const apiBookings = await bookingAPI.getUserBookings();
+         dispatch(loadBookingsSuccess(apiBookings as any));
+      } catch (error) {
+        console.log('Failed to load bookings from API, using empty array:', error);
+        // Start with empty bookings array for clean account
+        dispatch(loadBookingsSuccess([]));
+      }
+    };
+
+    loadBookings();
   }, [dispatch]);
 
   useEffect(() => {

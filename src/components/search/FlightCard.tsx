@@ -1,6 +1,13 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { useDispatch, useSelector } from 'react-redux';
 import { Plane, Clock, Calendar } from 'lucide-react';
 import { Flight } from '../../types';
 import { Button } from '../ui/Button';
+import { startBooking } from '../../store/slices/bookingSlice';
+import { openModal } from '../../store/slices/uiSlice';
+import { RootState } from '../../store';
 import { format } from 'date-fns';
 
 interface FlightCardProps {
@@ -8,6 +15,10 @@ interface FlightCardProps {
 }
 
 export function FlightCard({ flight }: FlightCardProps) {
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state: RootState) => state.user);
+  
   const departureTime = new Date(flight.departure);
   const arrivalTime = new Date(flight.arrival);
   const duration = Math.floor(flight.duration / 60) + 'h ' + (flight.duration % 60) + 'm';
@@ -16,6 +27,29 @@ export function FlightCard({ flight }: FlightCardProps) {
   const savingsPercentage = flight.originalPrice 
     ? Math.round((savings / flight.originalPrice) * 100) 
     : 0;
+
+  const handleFlightSelection = () => {
+    if (!isAuthenticated) {
+      dispatch(openModal('login'));
+      return;
+    }
+
+    // Start flight booking
+    dispatch(startBooking({
+      type: 'flight',
+      totalPrice: flight.price,
+      flight: {
+        flightId: flight.id,
+        passengers: [{ // Default single passenger
+          firstName: '',
+          lastName: '',
+          dateOfBirth: '',
+        }],
+      }
+    }));
+
+    router.push('/book');
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-6">
@@ -116,7 +150,7 @@ export function FlightCard({ flight }: FlightCardProps) {
           <Button variant="outline" size="sm">
             View Details
           </Button>
-          <Button size="sm">
+          <Button size="sm" onClick={handleFlightSelection}>
             Select Flight
           </Button>
         </div>

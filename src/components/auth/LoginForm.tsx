@@ -9,6 +9,7 @@ import { loginStart, loginSuccess, loginFailure } from '../../store/slices/userS
 import { closeModal, openModal } from '../../store/slices/uiSlice';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { authAPI } from '../../utils/api';
 
 interface LoginFormData {
   email: string;
@@ -37,18 +38,47 @@ export function LoginForm() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // Mock authentication - in real app, this would be an API call
+      // Try real API authentication first, fallback to mock
       if (data.email === 'demo@example.com' && data.password === 'password') {
-        const user = {
-          id: '1',
-          email: data.email,
-          firstName: 'Demo',
-          lastName: 'User',
-          avatar: '',
-          createdAt: new Date().toISOString(),
-        };
+        try {
+          // Try to get real JWT token from backend
+          const authResponse = await authAPI.demoLogin();
+          
+          if (authResponse.access_token) {
+            // Get user info from backend
+            try {
+              const userInfo = await authAPI.getCurrentUser();
+              dispatch(loginSuccess(userInfo as any));
+            } catch {
+              // Fallback to demo user if API fails
+              const user = {
+                id: '1',
+                email: data.email,
+                firstName: 'Demo',
+                lastName: 'User',
+                avatar: '',
+                createdAt: new Date().toISOString(),
+              };
+              dispatch(loginSuccess(user));
+            }
+          } else {
+            throw new Error('No token received');
+          }
+        } catch (apiError) {
+          console.log('API login failed, using mock auth:', apiError);
+          
+          // Fallback to mock authentication
+          const user = {
+            id: '1',
+            email: data.email,
+            firstName: 'Demo',
+            lastName: 'User',
+            avatar: '',
+            createdAt: new Date().toISOString(),
+          };
+          dispatch(loginSuccess(user));
+        }
 
-        dispatch(loginSuccess(user));
         dispatch(closeModal('login'));
         router.push('/dashboard');
       } else {

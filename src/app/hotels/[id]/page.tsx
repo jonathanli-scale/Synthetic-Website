@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { 
   Star, 
   MapPin, 
@@ -23,6 +23,8 @@ import {
 import { Hotel } from '../../../types';
 import { mockHotels } from '../../../utils/mockData';
 import { startBooking } from '../../../store/slices/bookingSlice';
+import { openModal } from '../../../store/slices/uiSlice';
+import { RootState } from '../../../store';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 
@@ -39,9 +41,10 @@ export default function HotelDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state: RootState) => state.user);
   const [hotel, setHotel] = useState<Hotel | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
+  const [selectedRoom, setSelectedRoom] = useState<string>('');
   const [bookingData, setBookingData] = useState({
     checkIn: '',
     checkOut: '',
@@ -57,6 +60,19 @@ export default function HotelDetailsPage() {
     }
   }, [params.id]);
 
+  // Server-side: render loading placeholder
+  if (typeof window === 'undefined') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Loading...</h2>
+          <p className="text-gray-600 mb-4">Please wait while we load the hotel details.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Client-side: show not found if hotel doesn't exist
   if (!hotel) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -73,17 +89,34 @@ export default function HotelDetailsPage() {
   const totalPrice = selectedRoomData ? selectedRoomData.price * bookingData.rooms : hotel.price;
 
   const handleBooking = () => {
+    if (!isAuthenticated) {
+      dispatch(openModal('login'));
+      return;
+    }
+
+    if (!selectedRoom) {
+      alert('Please select a room');
+      return;
+    }
+
+    if (!bookingData.checkIn || !bookingData.checkOut) {
+      alert('Please select check-in and check-out dates');
+      return;
+    }
+
+    // Dispatch booking action and navigate to booking page
     dispatch(startBooking({
       type: 'hotel',
+      totalPrice: totalPrice,
       hotel: {
-        hotelId: hotel.id,
-        roomId: selectedRoom!,
+        hotelId: hotel!.id,
+        roomId: selectedRoom,
         checkIn: bookingData.checkIn,
         checkOut: bookingData.checkOut,
         guests: bookingData.guests,
-      },
-      totalPrice,
+      }
     }));
+
     router.push('/book');
   };
 
