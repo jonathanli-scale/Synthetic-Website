@@ -8,6 +8,7 @@ from app.database.database import get_db
 from app.models.models import User, Booking
 from app.schemas.schemas import Booking as BookingSchema, BookingCreate
 from app.core.deps import get_current_active_user
+from app.api.v1.endpoints.logs import log_db_update_async
 
 router = APIRouter()
 
@@ -41,6 +42,21 @@ async def create_booking(
     db.add(db_booking)
     await db.commit()
     await db.refresh(db_booking)
+    
+    # Log the database insert
+    await log_db_update_async(
+        db=db,
+        text=f"Created new booking {booking_reference} for user {current_user.email}",
+        table_name="bookings",
+        update_type="insert",
+        values={
+            "booking_reference": booking_reference,
+            "user_id": current_user.id,
+            "booking_type": booking_data.booking_type,
+            "total_price": booking_data.total_price
+        },
+        user_id=str(current_user.id)
+    )
     
     return db_booking
 

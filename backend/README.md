@@ -140,7 +140,7 @@ GET /api/v1/flights/{id}        # Flight details
 ### Environment Variables
 Create a `.env` file:
 ```env
-DATABASE_URL=sqlite+aiosqlite:///./travel_booking.db
+DATABASE_URL=sqlite+aiosqlite:///travel_booking.db
 SECRET_KEY=your-super-secret-key
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 ALLOWED_ORIGINS=http://localhost:3000

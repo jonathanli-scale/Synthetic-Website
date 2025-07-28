@@ -11,6 +11,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { authAPI } from '../../utils/api';
 import { User } from '../../types';
+import { useEventLogger } from '../../utils/logger';
 
 interface LoginFormData {
   email: string;
@@ -23,6 +24,7 @@ export function LoginForm() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const logger = useEventLogger();
 
   const {
     register,
@@ -34,6 +36,13 @@ export function LoginForm() {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     dispatch(loginStart());
+    
+    // Log login attempt
+    logger.logCustom(
+      `User attempted to login with email: ${data.email}`,
+      'login_attempt',
+      { email: data.email }
+    );
 
     try {
       // Simulate API call
@@ -41,6 +50,8 @@ export function LoginForm() {
 
       // Try real API authentication first, fallback to mock
       if (data.email === 'demo@example.com' && data.password === 'password') {
+        let loggedInUser: User;
+        
         try {
           // Try to get real JWT token from backend
           const authResponse = await authAPI.demoLogin();
@@ -49,10 +60,11 @@ export function LoginForm() {
             // Get user info from backend
             try {
               const userInfo = await authAPI.getCurrentUser();
-              dispatch(loginSuccess(userInfo as User));
+              loggedInUser = userInfo as User;
+              dispatch(loginSuccess(loggedInUser));
             } catch {
               // Fallback to demo user if API fails
-              const user = {
+              loggedInUser = {
                 id: '1',
                 email: data.email,
                 firstName: 'Demo',
@@ -60,7 +72,7 @@ export function LoginForm() {
                 avatar: '',
                 createdAt: new Date().toISOString(),
               };
-              dispatch(loginSuccess(user));
+              dispatch(loginSuccess(loggedInUser));
             }
           } else {
             throw new Error('No token received');
@@ -69,7 +81,7 @@ export function LoginForm() {
           console.log('API login failed, using mock auth:', apiError);
           
           // Fallback to mock authentication
-          const user = {
+          loggedInUser = {
             id: '1',
             email: data.email,
             firstName: 'Demo',
@@ -77,10 +89,22 @@ export function LoginForm() {
             avatar: '',
             createdAt: new Date().toISOString(),
           };
-          dispatch(loginSuccess(user));
+          dispatch(loginSuccess(loggedInUser));
         }
 
+        // Log successful login
+        logger.logCustom(
+          `User successfully logged in with email: ${data.email}`,
+          'login_success',
+          { email: data.email, loginMethod: 'demo' }
+        );
+        
+        logger.setUserId(loggedInUser.id); // Update logger with user ID
+
         dispatch(closeModal('login'));
+        
+        // Log navigation to dashboard
+        logger.logNavigation('User navigated to dashboard after login', 'GO_TO_URL', '/dashboard');
         router.push('/dashboard');
       } else {
         dispatch(loginFailure('Invalid email or password'));

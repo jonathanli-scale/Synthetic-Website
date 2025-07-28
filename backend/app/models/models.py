@@ -175,4 +175,20 @@ class Deal(Base):
     
     # Metadata
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now()) 
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class EventLog(Base):
+    __tablename__ = "event_logs"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    event_type = Column(String, nullable=False, index=True)  # CLICK, SCROLL, HOVER, etc.
+    description = Column(Text, nullable=False)  # Natural language description
+    user_id = Column(String, nullable=True, index=True)  # Optional user ID
+    session_id = Column(String, nullable=True, index=True)  # Session identifier
+    timestamp = Column(DateTime(timezone=True), nullable=False, index=True)
+    event_metadata = Column(JSON, nullable=True)  # Event-specific data
+    source = Column(String, nullable=False, default='frontend')  # 'frontend' or 'backend'
+    
+    # Indexing for common queries
+    created_at = Column(DateTime(timezone=True), server_default=func.now()) 

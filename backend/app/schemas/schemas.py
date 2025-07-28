@@ -278,4 +278,27 @@ class SearchResponse(BaseModel):
     page: int
     per_page: int
     has_next: bool
-    has_prev: bool 
+    has_prev: bool
+
+
+# Event Log schemas
+class EventLogBase(BaseModel):
+    event_type: str
+    description: str
+    user_id: Optional[str] = None
+    session_id: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
+    source: str = "frontend"
+
+
+class EventLogCreate(EventLogBase):
+    timestamp: datetime
+
+
+class EventLogResponse(EventLogBase):
+    id: int
+    timestamp: datetime
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True 

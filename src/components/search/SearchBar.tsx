@@ -9,12 +9,14 @@ import { setSearchType } from '../../store/slices/uiSlice';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { UIState } from '../../types';
+import { useEventLogger } from '../../utils/logger';
 
 export function SearchBar() {
   const router = useRouter();
   const dispatch = useDispatch();
   const uiState = useSelector((state: RootState) => state.ui as UIState);
   const searchType = uiState.searchType;
+  const logger = useEventLogger();
 
   // Hotel search state
   const [hotelSearch, setHotelSearch] = useState({
@@ -46,6 +48,13 @@ export function SearchBar() {
 
   const handleTabChange = (type: 'hotels' | 'flights' | 'cars') => {
     dispatch(setSearchType(type));
+    
+    // Log tab change
+    logger.logClick(
+      `User switched to ${type} search tab`,
+      `[data-search-tab="${type}"]`,
+      { x: 0, y: 0 } // Coordinates would be captured in real click handler
+    );
   };
 
   const handleHotelSearch = () => {
@@ -57,7 +66,25 @@ export function SearchBar() {
       guests: hotelSearch.guests.toString(),
       rooms: hotelSearch.rooms.toString(),
     });
-    router.push(`/search?${params.toString()}`);
+    
+    // Log search action
+    logger.logCustom(
+      `User searched for hotels: ${hotelSearch.destination || 'all destinations'} from ${hotelSearch.checkIn} to ${hotelSearch.checkOut}, ${hotelSearch.guests} guests, ${hotelSearch.rooms} rooms`,
+      'hotel_search',
+      {
+        destination: hotelSearch.destination,
+        checkIn: hotelSearch.checkIn,
+        checkOut: hotelSearch.checkOut,
+        guests: hotelSearch.guests,
+        rooms: hotelSearch.rooms
+      }
+    );
+    
+    // Log navigation
+    const targetUrl = `/search?${params.toString()}`;
+    logger.logNavigation(`Navigating to hotel search results`, 'GO_TO_URL', targetUrl);
+    
+    router.push(targetUrl);
   };
 
   const handleFlightSearch = () => {
@@ -75,7 +102,26 @@ export function SearchBar() {
       params.append('returnDate', flightSearch.returnDate);
     }
     
-    router.push(`/search?${params.toString()}`);
+    // Log search action
+    logger.logCustom(
+      `User searched for flights: ${flightSearch.from || 'any origin'} to ${flightSearch.to || 'any destination'} on ${flightSearch.departureDate}, ${flightSearch.passengers} passengers, ${flightSearch.cabinClass} class`,
+      'flight_search',
+      {
+        from: flightSearch.from,
+        to: flightSearch.to,
+        departureDate: flightSearch.departureDate,
+        returnDate: flightSearch.returnDate,
+        passengers: flightSearch.passengers,
+        tripType: flightSearch.tripType,
+        cabinClass: flightSearch.cabinClass
+      }
+    );
+    
+    // Log navigation
+    const targetUrl = `/search?${params.toString()}`;
+    logger.logNavigation(`Navigating to flight search results`, 'GO_TO_URL', targetUrl);
+    
+    router.push(targetUrl);
   };
 
   const handleCarSearch = () => {
@@ -86,7 +132,24 @@ export function SearchBar() {
       dropoffDate: carSearch.dropoffDate,
       age: carSearch.age.toString(),
     });
-    router.push(`/search?${params.toString()}`);
+    
+    // Log search action
+    logger.logCustom(
+      `User searched for cars: ${carSearch.location || 'all locations'} from ${carSearch.pickupDate} to ${carSearch.dropoffDate}, driver age ${carSearch.age}`,
+      'car_search',
+      {
+        location: carSearch.location,
+        pickupDate: carSearch.pickupDate,
+        dropoffDate: carSearch.dropoffDate,
+        age: carSearch.age
+      }
+    );
+    
+    // Log navigation
+    const targetUrl = `/search?${params.toString()}`;
+    logger.logNavigation(`Navigating to car search results`, 'GO_TO_URL', targetUrl);
+    
+    router.push(targetUrl);
   };
 
   const tabs = [
